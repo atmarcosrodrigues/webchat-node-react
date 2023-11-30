@@ -1,13 +1,8 @@
-const User = require("../../models/userModel");
+const { getAllUsers } = require("../../services/databaseService/getUser");
 
 module.exports.getAllUsers = async (req, res, next) => {
   try {
-    const users = await User.find({ _id: { $ne: req.params.id } }).select([
-      "email",
-      "username",
-      "avatarImage",
-      "_id",
-    ]);
+    const users = await getAllUsers({ _id: { $ne: req.params.id } });
     return res.json(users);
   } catch (ex) {
     next(ex);

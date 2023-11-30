@@ -1,23 +1,18 @@
-const User = require("../../models/userModel");
-const bcrypt = require("bcrypt");
-const { usedUsernameMessage } = require("./constants");
+const { usedUsernameMessage, usedEmailMessage } = require("./constants");
+const { createUser } = require("../../services/databaseService/createUser");
+const { findUser } = require("../../services/databaseService/getUser");
 
 module.exports.register = async (req, res, next) => {
   try {
-    const { username, email, password } = req.body;
-    const usernameCheck = await User.findOne({ username });
+    const { username, email } = req.body;
+    const usernameCheck = await findUser({ username });
     if (usernameCheck)
       return res.json({ msg: usedUsernameMessage, status: false });
-    const emailCheck = await User.findOne({ email });
-    if (emailCheck)
-      return res.json({ msg: usedUsernameMessage, status: false });
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({
-      email,
-      username,
-      password: hashedPassword,
-    });
-    delete user.password;
+
+    const emailCheck = await findUser({ email });
+    if (emailCheck) return res.json({ msg: usedEmailMessage, status: false });
+
+    const user = await createUser(req.body);
     return res.json({ status: true, user });
   } catch (ex) {
     next(ex);
